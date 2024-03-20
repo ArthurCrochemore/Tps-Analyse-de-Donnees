@@ -46,3 +46,20 @@ max(iris$Petal.Length)
 sum(iris$Petal.Length) 
 length(iris$Petal.Length) 
 sum(iris$Petal.Length)/length(iris$Petal.Length) 
+sort(iris$Petal.Length) 
+
+par(mfrow = c(2, 2)) 
+plot(iris$Petal.Length, iris$Petal.Width, xlab = "Longueur du petale", ylab = "Largeur du petale", main = "Nuage de 
+points", pch = 20) 
+plot(iris$Petal.Length[iris$Species == "setosa"], iris$Petal.Width[iris$Species =="setosa"], xlim = c(1, 6.9), ylim = 
+       c(0.1, 2.5), xlab = "", ylab = "", main = "iris setosa", pch = 20) 
+plot(iris$Petal.Length[iris$Species == "versicolor"], iris$Petal.Width[iris$Species =="versicolor"], xlim = c(1, 6.9), ylim 
+     = c(0.1, 2.5), xlab = "", ylab = "", main = "iris versicolor", pch = 20) 
+plot(iris$Petal.Length[iris$Species == "virginica"], iris$Petal.Width[iris$Species =="virginica"], xlim = c(1, 6.9), ylim = 
+       c(0.1, 2.5), xlab = "", ylab = "", main = "iris virginica", pch = 20)
+
+#nouveau tableau sans colonne Species 
+new_data <- unclass(iris$Species) 
+pairs(iris[1:4], main = "Les iris de Fisher -- 3 especes", pch = c(21, 25, 24)[new_data], bg = c("red", "green3", 
+                                                                                                 "blue")[new_data], las = 2, gap = 0, labels = c("Longueur\nSepale", "Largeur\nSepale", 
+                                                                                                                                                 "Longueur\nPetale","Largeur\nPetale")) 

@@ -96,7 +96,7 @@ plot(iris$Petal.Length[iris$Species == "virginica"], iris$Petal.Width[iris$Speci
 #repr?sentation exaustive de toutes les comparaisons entre modalit?s et esp?ces.
 new_data <- unclass(iris$Species)
 pairs(iris[1:4], main = "Les iris de Fisher -- 3 especes", pch = c(21, 25, 24)[new_data], bg = c("red", "green3", "blue") [new_data], las = 3, gap = 0, labels = c("Longueur\nSepale","Largeur \nSepale","Longueur\nPetale","Largeur\nPetale"))
-#gap: distance entre les carrés, bg: couleur des points, las:orientation des titres des axes                                                                                               
+#gap: distance entre les carr?s, bg: couleur des points, las:orientation des titres des axes                                                                                               
 
 
 
