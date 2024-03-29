@@ -1,0 +1,58 @@
+library(FactoMineR)
+library(factoextra)
+library (corrplot)
+getwd() #affiche la localisation du r?pertoire de travail sous la forme d'un chemin absolu.
+setwd(dir="D:/Users/makris/tp_ad_2023/3tp_acp temperatures europe"); getwd()
+setwd(dir="D:"); getwd()
+temperature <- read.table('fichier_temperature_europe.csv', header=TRUE, sep=";", dec=".", row.names=1, fileEncoding = "latin1") 
+# on importe le ficher en precisant plusieurs choses: le nom des variables est present,le separateur de champ est ';'
+# le separateur de decimale est ',' et le nom des individus est present dans la premiere colonne
+res <- PCA(temperature, scale.unit=TRUE, ind.sup=24:35, quanti.sup=13:16, quali.sup=17)
+# mise en oeuvre de l'acp avec les info suivantes: individus supplementaires de 24 a 35 (ne sont pas des capitales), pas utlises donc pour le calcul des axes,
+# variables quantitatives supplementaires de 13 a 16 puis une derniere variable qualitative supplementaire en 17
+# la presence de scale.unit=TRUE pas necessaire car TRUE par defaut!
+
+# les aspects affichage
+plot(res, choix="ind", habillage=17)#construction du graphe des individus avec en couleur l'information portee par la colonne 17.
+plot.PCA(res, choix="ind", habillage=17, cex=0.7, title="mon ACP")# autre facon d'exprimer un affichage, on diminue la taille des caracteres, 1 par defaut.
+plot(res, choix="var") #on affiche toutes les variables y compris les suppl?mentaires
+graph.var(res, draw=c("var", "Moyenne"), label=c("Mai","Moyenne"))
+plot.PCA(res, choix="var", select=c("Mai","Moyenne"))# on choisit d'afficher toutes les variables celles de pca et les suppl?mentaires
+# graphe des variables avec une selection des variables : seuls les libell?s des variables Mai et moyenne sont pr?sents
+
+#les aspects calculs
+summary(res)
+# On r?cup?re les principaux tableaux de r?sultats sur: variances expliqu?es pour chaque axe, individus actifs, suppl?mentaires,
+# les variables quantitatives actives, suppl?mentaires et qualitatives suppl?mentaires.
+summary.PCA(res, nb.dec=2, nbelements=Inf)# on pr?cise ici deux chiffres apr?s la virgule pour tous les r?sultats (inf)
+dimdesc(res)# on d?crit les dimensions ? partir des variables, coef de corr?lation avec l'axe factoriel
+scale(temperature[1:23,1:16]*sqrt(22/23))#on calcule les donn?es centr?es-r?duites pour les variables quantitatives concernant les individus actifs uniquement!
+matrice_corr <- cor(temperature[1:23,1:16])# on calcule la matrice de corr?lation
+corrplot (matrice_corr, type = "upper", order = "hclust", tl.col = "black", tl.srt=45)
+res$eig # On calcule les valeurs propres, le pourcentage de la variance, et le cumulatif du pourcentage
+plot (res$eig)# ce graphe est peu visible
+fviz_eig(res,addlabels = TRUE, ylim = c(0,100))# plus visible et lisible!
+res$quanti.sup$coord # Donne la correlation des variables quantitatives supplementaires
+
+
+#affichage enrichi des r?sultats
+ind.plot<-fviz_pca_ind(res,  habillage=17, addEllipses=TRUE, ellipse.level=0.8)
+fviz_pca_var(res)
+
+#comment cr?er un fichier pdf (reference site STHDA)           
+#write.infile(res, file="resultats.csv", sep= ";")
+ind.plot<-fviz_pca_ind(res,  habillage=17, addEllipses=FALSE, ellipse.level=0.8) #on met dans la variable le graphique des individus
+#ind.plot<-fviz_pca_ind(res,  habillage=17, addEllipses=TRUE, ellipse.level=0.8)
+var.plot<-fviz_pca_var(res) #idem pour les variables
+pdf ("graphique_ind_var.pdf") # on cr?e un fichier pdf qui va contenir "resultat"
+print (ind.plot) # on stocke dedans en fait on imprime dedans (redirection)
+print (var.plot) #idem pour graphique des variables
+dev.off()
+#comment cr?er une image plus pratique pour y rajouter des commentaires
+jpeg ("graphique_ind.jpeg")
+print (ind.plot) # on stocke dedans en fait on imprime dedans (redirection)
+dev.off()
+jpeg ("graphique_var.jpeg")
+print (var.plot) #idem pour graphique des variables
+dev.off()# on marque la fin de la redirection du graphique vers le fichier pdf. Si pas fait, fichier ouvert et donc pas accessible!
+
