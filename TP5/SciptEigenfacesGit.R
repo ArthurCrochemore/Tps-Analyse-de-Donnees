@@ -3,7 +3,7 @@ rm(list=ls())
 
 # Set working directory to source file location ####
 getwd()
-setwd(dir="C:/Users/33611/Dossier_codes/DC-S8/Tps-Analyse-de-Donnees/TP5/yalefaces")  #je fixe mon repertoire de travail
+setwd(dir="C:/Users/33611/Dossier_codes/DC-S8/Tps-Analyse-de-Donnees/TP5")  #je fixe mon repertoire de travail
 getwd() 
 
 # Install and load libraries ####

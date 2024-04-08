@@ -1,9 +1,9 @@
 library(FactoMineR)
 library(factoextra)
 library(jpeg)
-library(RcmdrMisc)
 
-setwd("S:/Polytech/DI4/S8/Analyse de Donnees/Tps-Analyse-de-Donnees/TP5")
+setwd(dir="C:/Users/33611/Dossier_codes/DC-S8/Tps-Analyse-de-Donnees/TP5")  #je fixe mon repertoire de travail
 getwd() # quel est le chemin par defaut?
 
 img3 <- readJPEG("yalefaces/subject01.glasses.jpg")
+
