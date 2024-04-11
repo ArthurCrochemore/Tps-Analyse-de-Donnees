@@ -34,13 +34,16 @@ for (vector in matrices_images) {
   vector <- vector - trident
 }
 
-C_matrice <- numeric(dimension)
+C_matrice <- matrix(0L, nrow = dimension, ncol = dimension)
 for (i in 1:dimension) {
   for (j in 1:dimension) {
     for (k in 1:dimension) {
-      i_prim <- (i + k) %% dimension
-      j_prim <- (j + k) %% dimension
-      C_matrice[i][j] <- C_matrice[i][j] + matrices_images[i_prim][j_prim] * matrices_images[j_prim][i_prim]
+      i_prim <- ((i + k) %% dimension)
+      j_prim <- ((j + k) %% dimension)
+      
+      i_prim
+      
+      C_matrice[i,j] <- C_matrice[i,j] + matrices_images[i_prim,j_prim] * matrices_images[j_prim,i_prim]
     }
   }
 }
