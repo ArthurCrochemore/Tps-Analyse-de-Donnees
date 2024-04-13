@@ -49,98 +49,84 @@
 # }
 
 
-# Chargement des bibliothèques nécessaires
+# Charger le package jpeg
 library(jpeg)
 library(ggplot2)
 
-# Chemin vers le dossier contenant les images
-dossier <- "yalefaces/"
-fichiers <- list.files(dossier, pattern = "\\.jpg$", full.names = TRUE)
-nbfichiers <- length(fichiers)
+# Spécifier le chemin vers le dossier contenant les images
+chemin_dossier <- "yalefaces/"
 
-# Dimension d'une image
+# Lire toutes les images du dossier
+images <- list.files(chemin_dossier, full.names = TRUE)
+
+# Définir la dimension d'une image
 largeur_image <- 320
 hauteur_image <- 243
 dimension <- largeur_image * hauteur_image
 
-# Initialisation de la matrice pour stocker les images
-matrices_images <- vector("list", nbfichiers)
+# Initialiser la liste pour stocker les images
+matrices_images <- vector("list", length(images))
 moyenne_images <- numeric(dimension)
 
-# Boucle pour charger et traiter chaque image
-for (nb in 1:nbfichiers) {
+# Charger et traiter chaque image
+for (i in 1:length(images)) {
   # Lecture de l'image
-  img <- readJPEG(fichiers[nb], TRUE)
+  img <- readJPEG(images[i], native = TRUE)
   
-  if (is.null(img)) {
-    # Si la lecture de l'image a échoué, afficher un message d'erreur
-    cat("Erreur lors de la lecture de l'image :", fichiers[nb], "\n")
-  } else {
+  # Vérifier si l'image a été chargée correctement
+  if (!is.null(img)) {
     # Conversion de l'image en vecteur
     img_vector <- as.vector(img)
-  
+    
     # Ajout de l'image à la moyenne
     moyenne_images <- moyenne_images + img_vector
-  
+    
     # Stockage de l'image dans la liste matrices_images
-    matrices_images[[nb]] <- img_vector
+    matrices_images[[i]] <- img_vector
+  } else {
+    cat("Erreur lors de la lecture de l'image :", images[i], "\n")
   }
 }
 
 # Calcul de la moyenne des images
-if (nbfichiers > 0) {
-  moyenne_images <- moyenne_images / nbfichiers
+moyenne_images <- moyenne_images / length(images)
 
-  # Centrage des images par rapport à la moyenne
-  for (nb in 1:nbfichiers) {
-    if (!is.null(matrices_images[[nb]])) {
-      matrices_images[[nb]] <- matrices_images[[nb]] - moyenne_images
-    }
+# Centrage des images par rapport à la moyenne
+for (i in 1:length(images)) {
+  if (!is.null(matrices_images[[i]])) {
+    matrices_images[[i]] <- matrices_images[[i]] - moyenne_images
   }
-
-  # Conversion des données en une matrice
-  data_matrix <- matrix(unlist(matrices_images), nrow = dimension, byrow = TRUE)
-
-  # Normalisation des données
-  data_matrix <- scale(data_matrix)
-
-  # Calcul de la matrice de covariance
-  C_matrice <- cov(data_matrix)
-
-  # Affichage de la matrice des variances-covariances
-  print("Matrice des variances-covariances :")
-  print(C_matrice)
-} else {
-  cat("Aucune image valide trouvée dans le dossier.\n")
 }
 
+# Conversion des données en une matrice
+data_matrix <- matrix(unlist(matrices_images), nrow = dimension, byrow = TRUE)
+
+# Normalisation des données
+data_matrix <- scale(data_matrix)
+
+# Calcul de la matrice de covariance
+C_matrice <- cov(data_matrix)
 
 # Calcul des valeurs propres et vecteurs propres
 eig <- eigen(C_matrice)
 
 # Choix du nombre de composantes principales
-PVE <- eig$values / sum(eig$values) # D'apres la formule : PVE = lambda / sum(lambda)
-k <- which.max(cumsum(PVE) >= 0.95)[1] # On choisit k tel que la variance cumulée soit supérieure à 95%
-cat("Nombre de composantes principales choisies pour qu'on ait 95% de la variance : ", k, "\n")
+PVE <- eig$values / sum(eig$values)
+k <- which.max(cumsum(PVE) >= 0.95)[1]  # Choix pour expliquer au moins 95% de la variance
+cat("Nombre de composantes principales choisies pour expliquer 95% de la variance :", k, "\n")
 
 # Sélection des k vecteurs propres correspondant aux plus grandes valeurs propres
 k_vecteurs_propres <- eig$vectors[, 1:k]
 
 # Projection des données sur les k vecteurs propres
-projection<-data_matrix %*% k_vecteurs_propres
+projection <- t(k_vecteurs_propres) %*% t(data_matrix)
 
-# Visualisation : Projection des visages sur les vecteurs propres
-par(mfrow = c(2, 3))
-for (i in 1:5) {
-  # Projeter les visages sur les vecteurs propres.
-  image(matrix(t(k_vecteurs_propres) %*% projection[, i] + moyenne_images, ncol = largeur_image), col = gray.colors(256), xaxt = "n", yaxt = "n", main = paste("Projection", i))
-}
+# Convertir la projection en data frame pour ggplot2
+projection_df <- data.frame(PC1 = projection[1, ], PC2 = projection[2, ])
 
-# Reconstruction des visages appris dans la base réduite
-reconstruction <- k_vecteurs_propres %*% projection 
+# Afficher les données des visages dans l'espace des vecteurs propres avec ggplot2
+ggplot(projection_df, aes(x = PC1, y = PC2)) +
+  geom_point() +
+  labs(x = "Composante Principale 1", y = "Composante Principale 2") +
+  theme_minimal()
 
-# Visualisation : Projection des visages sur les vecteurs propres
-par(mfrow = c(2, 3))
-for (i in 1:5) {
-  image(matrix(reconstruction[, i] + moyenne_images, ncol = largeur_image), col = gray.colors(256), xaxt = "n", yaxt = "n", main = paste("Reconstruction", i))
-}
