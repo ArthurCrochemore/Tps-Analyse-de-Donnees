@@ -127,7 +127,7 @@ cat("Nombre de composantes principales choisies pour qu'on ait 95% de la varianc
 k_vecteurs_propres <- eig$vectors[, 1:k]
 
 # Projection des données sur les k vecteurs propres
-projection<-data.
+projection<-data_matrix %*% k_vecteurs_propres
 
 # Visualisation : Projection des visages sur les vecteurs propres
 par(mfrow = c(2, 3))
