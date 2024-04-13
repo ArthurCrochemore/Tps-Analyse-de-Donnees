@@ -1,0 +1,147 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# Charger les images en utilisant l'argument native = TRUE
+images_data <- lapply(images, function(chemin) readJPEG(chemin, native = TRUE))
+
+# Convertir chaque image en une matrice
+images_matrix <- array(unlist(images_data), dim = c(243 * 320, length(images_data)))
+
+# Concaténer les matrices pour former une matrice de données
+#images_matrix <- do.call(cbind, images_matrix)
+
+# Transposer la matrice de données pour que chaque ligne représente une image
+#images_matrix <- t(images_matrix)
+images_matrix_normalise <- scale(images_matrix)
+
+
+```
+
+```{r}
+# Calculer la matrice de covariance
+matrice_covariance <- cov(images_matrix_normalise)
+#print(matrice_covariance)
+
+```
+
+```{r}
+# Charger le package factoextra
+library(FactoMineR)
+
+# Effectuer l'ACP avec la fonction PCA()
+resultats_acp <- PCA(images_matrix_normalise, scale.unit = TRUE, graph = FALSE)
+
+# Récupérer les k premiers vecteurs propres et valeurs propres
+k <- 5  # Nombre de composantes principales à récupérer
+vecteurs_propres <- resultats_acp$var$coord[1:k, ]
+valeurs_propres <- resultats_acp$eig[1:k, "eigenvalue"]
+
+print(valeurs_propres)
+print(vecteurs_propres)
+```
+
+```{r}
+# Charger le package ggplot2
+library(ggplot2)
+
+# Projeter les visages sur les vecteurs propres
+projection <- images_matrix_normalise %*% resultats_acp$var$coord
+
+# Créer un data frame avec les coordonnées des visages projetées et identifier chaque visage
+projection_df <- data.frame(PC1 = projection[, 1], PC2 = projection[, 2], Visage = 1:nrow(projection))
+
+# Afficher les données des visages dans l'espace des vecteurs propres
+ggplot(projection_df, aes(x = PC1, y = PC2)) +
+  geom_point() +
+  labs(x = "PC1", y = "PC2") +
+  theme_minimal()
+
+```
+
+```{r}
+
+# Calculer la moyenne des visages
+moyenne_visages <- apply(images_matrix_normalise, 2, mean)
+
+# Reconstruction des visages dans la base réduite
+reconstruction <- projection %*% t(resultats_acp$var$coord) + moyenne_visages
+
+# Redimensionner la reconstruction pour correspondre aux dimensions originales des images
+reconstruction_matrix <- matrix(reconstruction, ncol = 320, byrow = TRUE)
+
+# Afficher les visages reconstruits
+for (i in 1:9) {
+  img <- matrix(reconstruction_matrix[i, ], nrow = 243, ncol = 320)
+  image(img, col = gray.colors(256), main = paste("Visage", i))
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Calculer la matrice de covariance
+matrice_covariance <- cov(images_normalized)
+
+```
+
+```{r}
+# Charger les packages
+library(FactoMineR)
+library(factoextra)
+
+# Effectuer l'ACP
+resultats_acp <- PCA(images_normalisees, graph = FALSE)
+
+# Visualiser un résumé des résultats
+#print(summary(resultats_acp))
+
+# Visualiser les individus dans l'ACP
+fviz_pca_ind(resultats_acp, geom = "point", pointshape = 21, pointsize = 2, 
+             title = "ACP - Individus")
+
+```
+
+```{r}
+object.size(images_normalisees)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
